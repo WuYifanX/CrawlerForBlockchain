@@ -19,7 +19,6 @@ const crawlerForTwitter = (config) => {
     client.get('statuses/user_timeline', params)
         .then((tweets) => {
             tweets.map((tweet) => {
-                console.log(tweet.text);
                 eventEmitter.emit('fetchResult', {
                     type: "twitter",
                     name: config.keyName,

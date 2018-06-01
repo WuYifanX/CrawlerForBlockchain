@@ -2,55 +2,6 @@
 
     let dataInStore = null;
     let intervalId;
-    const websocketConnection = function () {
-        const ws = new WebSocket("ws://localhost:3000/fetchUpdates");
-        ws.onopen = function (evt) {
-            console.log("Connection open ...");
-            ws.send("Hello WebSockets!");
-        };
-
-        ws.onmessage = function (evt) {
-            let data = JSON.parse(evt.data);
-            console.log(data);
-            switch (data.type) {
-                case "initial":
-                    initTheDataset(data);
-                    break;
-                case "update":
-                    updateTheDataset(data);
-                    break;
-                default:
-                    break;
-            }
-            setProgressBarInterval();
-
-        };
-
-        ws.onclose = function (evt) {
-            console.log("Connection closed.");
-        };
-    };
-
-    const setProgressBarInterval = function (progress = 0) {
-        if(intervalId){
-            clearInterval(intervalId);
-            intervalId = null;
-        }
-
-        intervalId = setInterval(function () {
-            progress = progress < 100 ? progress + 1 : 0;
-            updateTheProgressBar(progress)
-        }, 3600);
-
-
-        const updateTheProgressBar = function (progress) {
-            const $progressBar = $('.progress .progress-bar');
-            $progressBar.css({
-                width: progress + '%'
-            });
-        };
-    };
-
 
     const initTheDataset = function (data) {
 
@@ -72,16 +23,61 @@
         updateTheContent(projectObjectList);
 
         showMessage({
-            type:"success",
+            type: "success",
             message: projectNameList.toString()
         })
     };
 
+    const websocketConnection = function () {
+        const ws = new WebSocket("ws://localhost:3000/fetchUpdates");
+        ws.onopen = function (evt) {
+            console.log("Connection open ...");
+            ws.send("Hello WebSockets!");
+        };
+
+        ws.onmessage = function (evt) {
+            let data = JSON.parse(evt.data);
+            switch (data.type) {
+                case "initial":
+                    initTheDataset(data);
+                    break;
+                case "update":
+                    updateTheDataset(data);
+                    break;
+                default:
+                    break;
+            }
+            setProgressBarInterval();
+
+        };
+
+        ws.onclose = function (evt) {
+            console.log("Connection closed.");
+        };
+    };
+
+    const setProgressBarInterval = function (progress = 0) {
+        if (intervalId) {
+            clearInterval(intervalId);
+            intervalId = null;
+        }
+
+        intervalId = setInterval(function () {
+            progress = progress < 100 ? progress + 1 : 0;
+            updateTheProgressBar(progress)
+        }, 3600);
+
+
+        const updateTheProgressBar = function (progress) {
+            const $progressBar = $('.progress .progress-bar');
+            $progressBar.css({
+                width: progress + '%'
+            });
+        };
+    };
+
 
     const updateTheDataset = function (data) {
-        if (Object.keys(data.error).length) {
-            showMessage(Object.assign({}, data.error, {type: "error"}));
-        }
 
 
         const updateProjectNameList = Object.keys(data.data);
@@ -96,10 +92,15 @@
         });
         updateTheContent(UpdateProjectObjectList);
 
-        showMessage({
-            type:"success",
-            message: updateProjectNameList.toString()
-        })
+        if (Object.keys(data.error).length) {
+            showMessage(Object.assign({}, data.error, {type: "error"}));
+        } else {
+            showMessage({
+                type: "success",
+                message: updateProjectNameList.toString()
+            })
+        }
+
     };
 
     const showMessage = function (message) {
@@ -112,10 +113,11 @@
 
         const getMessageObject = function (message) {
             let messageObject = {};
+            debugger;
             switch (message.type) {
                 case "error":
                     messageObject.className = "alert-danger";
-                    messageObject.message = JSON.stringify(message) + "/n" + "可以尝试刷新页面或者重启服务来解决。"+ "/n" + "如果还没有成功，请把错误记录并且联系维护人员;";
+                    messageObject.message =  "\n" + "可以尝试刷新页面或者重启服务来解决。" + "\n" + "如果还没有成功，请把错误记录并且联系维护人员;"+ JSON.stringify(message);
                     break;
                 case "success":
                     messageObject.className = "alert-success";
@@ -130,12 +132,9 @@
 
         const messageObj = getMessageObject(message);
 
-        const messageDivString = `
-                <div class="alert ${getMessageObject(messageObj)}" role="alert" id=${MESSAGEID}>${messageObj.message}</div>
-        `;
+        const messageDivString = `<div class="alert ${getMessageObject(messageObj).className}" role="alert" id=${MESSAGEID}>${messageObj.message}</div>`;
 
-        const $container = $("container")
-            .insertBefore(messageDivString);
+        $("#message").append($(messageDivString));
 
     };
 
@@ -174,8 +173,6 @@
             .append($divs)
 
     };
-
-
 
 
     const updateTheContent = function (projectObjectList) {

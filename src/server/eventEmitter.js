@@ -12,14 +12,12 @@ const saveDataInDatabase = require("./database/index").saveData;
 const readDataFromDatabase = require("./database/index").readData;
 
 const dataCountFilter = function (data, displayCount = 5) {
-    console.log(data);
 
     return data;
 
 };
 
 eventEmitter.on("fetchResult", function (result) {
-
     saveDataInDatabase(result, function (needStreamForClients) {
         if (needStreamForClients) {
             const data = dataCountFilter(readDataFromDatabase(result.type, result.name));
@@ -29,8 +27,6 @@ eventEmitter.on("fetchResult", function (result) {
             });
         }
     });
-
-
 });
 
 eventEmitter.on("fetchResultError", function (errorMessage) {

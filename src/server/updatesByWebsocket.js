@@ -49,7 +49,6 @@ const initTheUpdateByWebsocket = function () {
     resetTheUpdatePool();
 
     setInterval(function () {
-        console.log(updatePool);
         if (Object.keys(updatePool.error).length || Object.keys(updatePool.data).length) {
             console.log("有更新的内容");
             sendMessageToClients(updatePool);
